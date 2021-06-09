@@ -5,6 +5,7 @@
 #include <tuple>
 #include <memory>
 #include <initializer_list>
+#include <string>
 
 using namespace std;
 
@@ -144,7 +145,86 @@ public:
     Conditions &operator()(){ return exec(); }
 };
 
+
+class Number {
+    double m_data;
+public:
+    Number(double data = 0): m_data(data) {}
+    Number(const Number &o): m_data(o.m_data) {}
+    Number(const string &str): m_data(stod(str)) {}
+    Number(const char *str): m_data(stod(str)) {}
+    
+    Number &operator=(const Number &o) { m_data = o.m_data; return *this;}
+    Number &operator=(const string &str) { m_data = stod(str); return *this;}
+    Number &operator=(const char *str) { m_data = stod(str); return *this;}
+    
+    /* Number & Number */
+    Number operator+(const Number &o) { return m_data + o.m_data;}
+    Number operator-(const Number &o) { return m_data - o.m_data;}
+    
+    Number operator/(const Number &o) { return m_data / o.m_data;}
+    Number operator*(const Number &o) { return m_data * o.m_data;}
+    Number operator%(const Number &o) { return (int)m_data % (int)o.m_data;}
+    
+    /* Number & double */
+    Number operator+(const double &n) { return m_data + n;}
+    Number operator-(const double &n) { return m_data - n;}
+    
+    Number operator/(const double &n) { return m_data / n;}
+    Number operator*(const double &n) { return m_data * n;}
+    Number operator%(const double &n) { return (int)m_data % (int)n;}
+    
+    /* Number & int */
+    Number operator+(const int &n) { return m_data + n;}
+    Number operator-(const int &n) { return m_data - n;}
+    
+    Number operator/(const int &n) { return m_data / n;}
+    Number operator*(const int &n) { return m_data * n;}
+    Number operator%(const int &n) { return (int)m_data % n;}
+    
+    /* Number & string */
+    Number operator+(const string &n) { return m_data + stod(n);}
+    Number operator-(const string &n) { return m_data - stod(n);}
+    
+    Number operator/(const string &n) { return m_data / stod(n);}
+    Number operator*(const string &n) { return m_data * stod(n);}
+    Number operator%(const string &n) { return (int)m_data % (int)stod(n);}
+    
+    /* Number & char[] */
+    Number operator+(const char *n) { return m_data + stod(n);}
+    Number operator-(const char *n) { return m_data - stod(n);}
+    
+    Number operator/(const char *n) { return m_data / stod(n);}
+    Number operator*(const char *n) { return m_data * stod(n);}
+    Number operator%(const char *n) { return (int)m_data % (int)stod(n);}
+    
+    /*post*/ Number operator++(int) { return m_data++;}
+    /*pre*/ Number &operator++() { ++m_data; return *this;}
+    /*post*/ Number operator--(int) { return m_data--;}
+    /*pre*/ Number &operator--() { --m_data; return *this;}
+    Number operator+() { return m_data; }
+    Number operator-() { return -m_data; }
+    
+    operator int() const { return (int)m_data; }
+    operator double() const { return (double)m_data; }
+    operator float() const { return (float)m_data; }
+    operator string() const { return to_string(m_data); }
+};
+
+/* string -> Number */
+Number operator+(const string &str) { return stod(str); }
+Number operator-(const string &str) { return stod(str); }
+
+ostream& operator<<(ostream& os, const Number &num) {
+    os << (float)num;
+    return os;
+}
+
 int main() {
+    cout << (Number(33) + "15" - "99") << "\n";
+    
+    
+    
     int lol = 5;
     If a = If(lol == 6);
     If not_a = !a;
