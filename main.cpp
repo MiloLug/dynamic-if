@@ -166,6 +166,31 @@ public:
     Number operator*(const Number &o) { return m_data * o.m_data;}
     Number operator%(const Number &o) { return (int)m_data % (int)o.m_data;}
     
+    bool operator<(const Number &o) { return m_data < o.m_data; }
+    bool operator>(const Number &o) { return m_data > o.m_data; }
+    bool operator==(const Number &o) { return m_data == o.m_data; }
+    bool operator!=(const Number &o) { return m_data != o.m_data; }
+    
+    bool operator&&(const Number &o) { return m_data && o.m_data; }
+    bool operator||(const Number &o) { return m_data || o.m_data; }
+    
+    Number operator|(const Number &o) { return (int)m_data | (int)o.m_data; }
+    Number operator&(const Number &o) { return (int)m_data & (int)o.m_data; }
+    Number operator^(const Number &o) { return (int)m_data ^ (int)o.m_data; }
+    Number operator<<(const Number &o) { return (int)m_data << (int)o.m_data; }
+    Number operator>>(const Number &o) { return (int)m_data >> (int)o.m_data; }
+    
+    Number &operator+=(const Number &o) { m_data += o.m_data; return *this; }
+    Number &operator-=(const Number &o) { m_data -= o.m_data; return *this; }
+    Number &operator/=(const Number &o) { m_data /= o.m_data; return *this; }
+    Number &operator*=(const Number &o) { m_data *= o.m_data; return *this; }
+    Number &operator%=(const Number &o) { m_data = (int)m_data % (int)o.m_data; return *this; }
+    Number &operator|=(const Number &o) { m_data = (int)m_data | (int)o.m_data; return *this; }
+    Number &operator&=(const Number &o) { m_data = (int)m_data & (int)o.m_data; return *this; }
+    Number &operator^=(const Number &o) { m_data = (int)m_data ^ (int)o.m_data; return *this; }
+    Number &operator<<=(const Number &o) { m_data = (int)m_data << (int)o.m_data; return *this; }
+    Number &operator>>=(const Number &o) { m_data = (int)m_data >> (int)o.m_data; return *this; }
+    
     /* Number & double */
     Number operator+(const double &n) { return m_data + n;}
     Number operator-(const double &n) { return m_data - n;}
@@ -173,6 +198,31 @@ public:
     Number operator/(const double &n) { return m_data / n;}
     Number operator*(const double &n) { return m_data * n;}
     Number operator%(const double &n) { return (int)m_data % (int)n;}
+    
+    bool operator<(const double &n) { return m_data < n; }
+    bool operator>(const double &n) { return m_data > n; }
+    bool operator==(const double &n) { return m_data == n; }
+    bool operator!=(const double &n) { return m_data != n; }
+    
+    bool operator&&(const double &n) { return m_data && n; }
+    bool operator||(const double &n) { return m_data || n; }
+    
+    Number operator|(const double &n) { return (int)m_data | (int)n; }
+    Number operator&(const double &n) { return (int)m_data & (int)n; }
+    Number operator^(const double &n) { return (int)m_data ^ (int)n; }
+    Number operator<<(const double &n) { return (int)m_data << (int)n; }
+    Number operator>>(const double &n) { return (int)m_data >> (int)n; }
+    
+    Number &operator+=(const double &n) { m_data += n; return *this; }
+    Number &operator-=(const double &n) { m_data -= n; return *this; }
+    Number &operator/=(const double &n) { m_data /= n; return *this; }
+    Number &operator*=(const double &n) { m_data *= n; return *this; }
+    Number &operator%=(const double &n) { m_data = (int)m_data % (int)n; return *this; }
+    Number &operator|=(const double &n) { m_data = (int)m_data | (int)n; return *this; }
+    Number &operator&=(const double &n) { m_data = (int)m_data & (int)n; return *this; }
+    Number &operator^=(const double &n) { m_data = (int)m_data ^ (int)n; return *this; }
+    Number &operator<<=(const double &n) { m_data = (int)m_data << (int)n; return *this; }
+    Number &operator>>=(const double &n) { m_data = (int)m_data >> (int)n; return *this; }
     
     /* Number & int */
     Number operator+(const int &n) { return m_data + n;}
@@ -182,13 +232,63 @@ public:
     Number operator*(const int &n) { return m_data * n;}
     Number operator%(const int &n) { return (int)m_data % n;}
     
-    /* Number & string */
-    Number operator+(const string &n) { return m_data + stod(n);}
-    Number operator-(const string &n) { return m_data - stod(n);}
+    bool operator<(const int &n) { return m_data < n; }
+    bool operator>(const int &n) { return m_data > n; }
+    bool operator==(const int &n) { return m_data == n; }
+    bool operator!=(const int &n) { return m_data != n; }
     
-    Number operator/(const string &n) { return m_data / stod(n);}
-    Number operator*(const string &n) { return m_data * stod(n);}
-    Number operator%(const string &n) { return (int)m_data % (int)stod(n);}
+    bool operator&&(const int &n) { return m_data && n; }
+    bool operator||(const int &n) { return m_data || n; }
+    
+    Number operator|(const int &n) { return (int)m_data | n; }
+    Number operator&(const int &n) { return (int)m_data & n; }
+    Number operator^(const int &n) { return (int)m_data ^ n; }
+    Number operator<<(const int &n) { return (int)m_data << n; }
+    Number operator>>(const int &n) { return (int)m_data >> n; }
+    
+    Number &operator+=(const int &n) { m_data += n; return *this; }
+    Number &operator-=(const int &n) { m_data -= n; return *this; }
+    Number &operator/=(const int &n) { m_data /= n; return *this; }
+    Number &operator*=(const int &n) { m_data *= n; return *this; }
+    Number &operator%=(const int &n) { m_data = (int)m_data % n; return *this; }
+    Number &operator|=(const int &n) { m_data = (int)m_data | n; return *this; }
+    Number &operator&=(const int &n) { m_data = (int)m_data & n; return *this; }
+    Number &operator^=(const int &n) { m_data = (int)m_data ^ n; return *this; }
+    Number &operator<<=(const int &n) { m_data = (int)m_data << n; return *this; }
+    Number &operator>>=(const int &n) { m_data = (int)m_data >> n; return *this; }
+    
+    /* Number & string */
+    Number operator+(const string &n) { return m_data + stod(n); }
+    Number operator-(const string &n) { return m_data - stod(n); }
+    
+    Number operator/(const string &n) { return m_data / stod(n); }
+    Number operator*(const string &n) { return m_data * stod(n); }
+    Number operator%(const string &n) { return (int)m_data % stoi(n); }
+    
+    bool operator<(const string &n) { return m_data < stod(n); }
+    bool operator>(const string &n) { return m_data > stod(n); }
+    bool operator==(const string &n) { return m_data == stod(n); }
+    bool operator!=(const string &n) { return m_data != stod(n); }
+    
+    bool operator&&(const string &n) { return m_data && stod(n); }
+    bool operator||(const string &n) { return m_data || stod(n); }
+    
+    Number operator|(const string &n) { return (int)m_data | stoi(n); }
+    Number operator&(const string &n) { return (int)m_data & stoi(n); }
+    Number operator^(const string &n) { return (int)m_data ^ stoi(n); }
+    Number operator<<(const string &n) { return (int)m_data << stoi(n); }
+    Number operator>>(const string &n) { return (int)m_data >> stoi(n); }
+    
+    Number &operator+=(const string &n) { m_data += stod(n); return *this; }
+    Number &operator-=(const string &n) { m_data -= stod(n); return *this; }
+    Number &operator/=(const string &n) { m_data /= stod(n); return *this; }
+    Number &operator*=(const string &n) { m_data *= stod(n); return *this; }
+    Number &operator%=(const string &n) { m_data = (int)m_data % stoi(n); return *this; }
+    Number &operator|=(const string &n) { m_data = (int)m_data | stoi(n); return *this; }
+    Number &operator&=(const string &n) { m_data = (int)m_data & stoi(n); return *this; }
+    Number &operator^=(const string &n) { m_data = (int)m_data ^ stoi(n); return *this; }
+    Number &operator<<=(const string &n) { m_data = (int)m_data << stoi(n); return *this; }
+    Number &operator>>=(const string &n) { m_data = (int)m_data >> stoi(n); return *this; }
     
     /* Number & char[] */
     Number operator+(const char *n) { return m_data + stod(n);}
@@ -196,8 +296,34 @@ public:
     
     Number operator/(const char *n) { return m_data / stod(n);}
     Number operator*(const char *n) { return m_data * stod(n);}
-    Number operator%(const char *n) { return (int)m_data % (int)stod(n);}
+    Number operator%(const char *n) { return (int)m_data % stoi(n);}
     
+    bool operator<(const char *n) { return m_data < stod(n); }
+    bool operator>(const char *n) { return m_data > stod(n); }
+    bool operator==(const char *n) { return m_data == stod(n); }
+    bool operator!=(const char *n) { return m_data != stod(n); }
+    
+    bool operator&&(const char *n) { return m_data && stod(n); }
+    bool operator||(const char *n) { return m_data || stod(n); }
+    
+    Number operator|(const char *n) { return (int)m_data | stoi(n); }
+    Number operator&(const char *n) { return (int)m_data & stoi(n); }
+    Number operator^(const char *n) { return (int)m_data ^ stoi(n); }
+    Number operator<<(const char *n) { return (int)m_data << stoi(n); }
+    Number operator>>(const char *n) { return (int)m_data >> stoi(n); }
+    
+    Number &operator+=(const char *n) { m_data += stod(n); return *this; }
+    Number &operator-=(const char *n) { m_data -= stod(n); return *this; }
+    Number &operator/=(const char *n) { m_data /= stod(n); return *this; }
+    Number &operator*=(const char *n) { m_data *= stod(n); return *this; }
+    Number &operator%=(const char *n) { m_data = (int)m_data % stoi(n); return *this; }
+    Number &operator|=(const char *n) { m_data = (int)m_data | stoi(n); return *this; }
+    Number &operator&=(const char *n) { m_data = (int)m_data & stoi(n); return *this; }
+    Number &operator^=(const char *n) { m_data = (int)m_data ^ stoi(n); return *this; }
+    Number &operator<<=(const char *n) { m_data = (int)m_data << stoi(n); return *this; }
+    Number &operator>>=(const char *n) { m_data = (int)m_data >> stoi(n); return *this; }
+    
+    /* Common cases */
     /*post*/ Number operator++(int) { return m_data++;}
     /*pre*/ Number &operator++() { ++m_data; return *this;}
     /*post*/ Number operator--(int) { return m_data--;}
@@ -205,8 +331,11 @@ public:
     Number operator+() { return m_data; }
     Number operator-() { return -m_data; }
     
+    bool operator!() { return !m_data; }
+    bool operator~() { return ~(int)m_data; }
+    
     operator int() const { return (int)m_data; }
-    operator double() const { return (double)m_data; }
+    operator double() const { return m_data; }
     operator float() const { return (float)m_data; }
     operator string() const { return to_string(m_data); }
 };
@@ -216,12 +345,14 @@ Number operator+(const string &str) { return stod(str); }
 Number operator-(const string &str) { return stod(str); }
 
 ostream& operator<<(ostream& os, const Number &num) {
-    os << (float)num;
+    os << (double)num;
     return os;
 }
 
 int main() {
-    cout << (Number(33) + "15" - "99") << "\n";
+    Number num = 4;
+    num <<= 1;
+    cout << num << "\n";
     
     
     
