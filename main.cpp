@@ -4,20 +4,68 @@
 #include <vector>
 #include <tuple>
 #include <memory>
+#include <list>
 #include <initializer_list>
 #include <string>
+#include <map>
 
 using namespace std;
 
 typedef function<void()> void_fn;
 
-class Condition {
+class Object {
 public:
+    static string typeOf(Object *o){ return o->__class_name__(); }
+    static bool hasParent(Object *o, const string &parent_name){ return false; }
+    
+    static string __s_class_name__(){ return "Object"; }
+    virtual string __class_name__(){ return __s_class_name__(); }
+    
+    static shared_ptr<list<string>> __s_parents__(){ return shared_ptr<list<string>>(new list<string>({})); }
+    virtual shared_ptr<list<string>> __parents__(){ return __s_parents__(); }
+    
+    virtual ~Object() {}
+};
+
+class Condition: public Object {
+    list<void_fn> m_bindedThen = {};
+    list<void_fn> m_bindedOther = {};
+public:
+    static string __s_class_name__(){ return "Condition"; }
+    virtual string __class_name__(){ return __s_class_name__(); }
+    
+    static shared_ptr<list<string>> __s_parents__(){ 
+        auto parents = Object::__s_parents__();
+        parents->push_back(Object::__s_class_name__());
+        return parents;
+    }
+    virtual shared_ptr<list<string>> __parents__(){ return __s_parents__(); }
+    
     Condition() {}
+    Condition(const Condition &o): m_bindedThen(o.m_bindedThen), m_bindedOther(o.m_bindedOther) {}
+    Condition &operator=(const Condition &o) {
+        m_bindedThen = o.m_bindedThen;
+        m_bindedOther = o.m_bindedOther;
+        return *this;
+    }
     virtual shared_ptr<Condition> share() { return shared_ptr<Condition>(new Condition(*this)); }
     
     virtual Condition &then(const void_fn &fn) { return *this; }
     virtual Condition &other(const void_fn &fn) { return *this; }
+    
+    virtual Condition &bindThen(const void_fn &fn){
+        m_bindedThen.push_back(fn);
+        return *this;
+    }
+    virtual Condition &bindOther(const void_fn &fn){
+        m_bindedOther.push_back(fn);
+        return *this;
+    }
+    virtual Condition &exec(){
+        for(auto &fn: m_bindedThen) this->then(fn);
+        for(auto &fn: m_bindedOther) this->other(fn);
+        return *this;
+    }
 
     virtual ~Condition() {}
 };
@@ -25,11 +73,22 @@ public:
 class If: public Condition {
     function<bool()> m_expr;
 public:
-    If(bool state): m_expr([state]{return state;}), Condition() {}
-    If(const function<bool()> &expr): m_expr(expr), Condition() {}
-    If(const If &o): m_expr(o.m_expr) {}
+    static string __s_class_name__(){ return "If"; }
+    virtual string __class_name__(){ return __s_class_name__(); }
+    
+    static shared_ptr<list<string>> __s_parents__(){ 
+        auto parents = Condition::__s_parents__();
+        parents->push_back(Condition::__s_class_name__());
+        return parents;
+    }
+    virtual shared_ptr<list<string>> __parents__(){ return __s_parents__(); }
+
+    If(bool state): m_expr([state]{return state;}) {}
+    If(const function<bool()> &expr): m_expr(expr) {}
+    If(const If &o): m_expr(o.m_expr), Condition((Condition)o) {}
     If &operator=(const If &o) {
         m_expr = o.m_expr;
+        Condition::operator=((Condition)o);
         return *this;
     }
     virtual shared_ptr<Condition> share() { return shared_ptr<Condition>(new If(*this)); }
@@ -45,6 +104,10 @@ public:
         fn();
         return *this;
     }
+    
+    virtual If &bindThen(const void_fn &fn){ Condition::bindThen(fn); return *this; }
+    virtual If &bindOther(const void_fn &fn){ Condition::bindOther(fn); return *this; }
+    virtual If &exec(){ Condition::exec(); return *this; }
     
     If otherIf(bool state){
         return If([expr = this->m_expr, state]{ return !expr() && state; });
@@ -64,45 +127,86 @@ public:
 
 class For: public Condition {
     void_fn m_init;
+    bool m_hasInit;
     If m_condition;
     void_fn m_postExpr;
+    bool m_hasPostExpr;
     bool m_stateBreak = false;
+    bool m_forever;
 public:
+    static string __s_class_name__(){ return "For"; }
+    virtual string __class_name__(){ return __s_class_name__(); }
+    
+    static shared_ptr<list<string>> __s_parents__(){ 
+        auto parents = Condition::__s_parents__();
+        parents->push_back(Condition::__s_class_name__());
+        return parents;
+    }
+    virtual shared_ptr<list<string>> __parents__(){ return __s_parents__(); }
+
     For(const void_fn &init, const If &condition, const void_fn &postExpr):
-        m_init(init), m_condition(condition), m_postExpr(postExpr), Condition() {}
+        m_init(init), m_hasInit(true), m_condition(condition),
+        m_postExpr(postExpr), m_hasPostExpr(true), m_forever(false) {}
     For(const void_fn &init, const If &condition):
-        m_init(init), m_condition(condition), m_postExpr([]{}), Condition() {}
+        m_init(init), m_hasInit(true), m_condition(condition),
+        m_postExpr([]{}), m_hasPostExpr(false), m_forever(false) {}
+    For(const If &condition):
+        m_init([]{}), m_hasInit(false), m_condition(condition),
+        m_postExpr([]{}), m_hasPostExpr(false), m_forever(false) {}
+    For():
+        m_init([]{}), m_hasInit(false), m_condition(true),
+        m_postExpr([]{}), m_hasPostExpr(false), m_forever(true) {}
         
     For(const For &o):
-        m_init(o.m_init), m_condition(o.m_condition), m_postExpr(o.m_postExpr), Condition() {}
+        m_init(o.m_init), m_hasInit(o.m_hasInit), m_condition(o.m_condition),
+        m_postExpr(o.m_postExpr), m_hasPostExpr(o.m_hasPostExpr),
+        m_forever(o.m_forever), Condition((Condition)o) {}
     For &operator=(const For &o) {
         m_init = o.m_init;
+        m_hasInit = o.m_hasInit;
         m_condition = o.m_condition;
         m_postExpr = o.m_postExpr;
+        m_hasPostExpr = o.m_hasPostExpr;
+        m_forever = o.m_forever;
+        Condition::operator=((Condition)o);
         return *this;
     }
     virtual shared_ptr<Condition> share() { return shared_ptr<Condition>(new For(*this)); }
     
     virtual For &then(const void_fn &fn){
         m_stateBreak = false;
-        m_init();
-        while((bool)m_condition && !m_stateBreak){
+        if(m_hasInit) m_init();
+        while(!m_stateBreak && (m_forever || (bool)m_condition)){
             fn();
-            m_postExpr();
+            if(m_hasPostExpr) m_postExpr();
         }
         return *this;
     }
     virtual For &other(const void_fn &fn){ return *this; }
+    
+    virtual For &bindThen(const void_fn &fn){ Condition::bindThen(fn); return *this; }
+    virtual For &bindOther(const void_fn &fn){ Condition::bindOther(fn); return *this; }
+    virtual For &exec(){ Condition::exec(); return *this; }
     
     For &stop(){ m_stateBreak = true; return *this; }
     
     virtual ~For() {}
 };
 
-class ConditionExecutor {
+class ConditionExecutor: public Object {
     shared_ptr<Condition> m_condition;
     void_fn m_thenFn, m_otherFn;
 public:
+    static string __s_class_name__(){ return "ConditionExecutor"; }
+    virtual string __class_name__(){ return __s_class_name__(); }
+    
+    static shared_ptr<list<string>> __s_parents__(){ 
+        auto parents = Object::__s_parents__();
+        parents->push_back(Object::__s_class_name__());
+        return parents;
+    }
+    virtual shared_ptr<list<string>> __parents__(){ return __s_parents__(); }
+
     ConditionExecutor(shared_ptr<Condition> condition, const void_fn &thenFn, const void_fn &otherFn):
         m_condition(condition), m_thenFn(thenFn), m_otherFn(otherFn) {}
     ConditionExecutor(shared_ptr<Condition> condition, const void_fn &thenFn):
@@ -124,12 +228,24 @@ public:
         m_condition->then(m_thenFn);
         return *this;
     }
+
+    virtual ~ConditionExecutor() {}
 };
 
-class Conditions {
+class Conditions: public Object {
     typedef vector<ConditionExecutor> conditions_t;
     vector<ConditionExecutor> m_conditions;
 public:
+    static string __s_class_name__(){ return "Conditions"; }
+    virtual string __class_name__(){ return __s_class_name__(); }
+    
+    static shared_ptr<list<string>> __s_parents__(){ 
+        auto parents = Object::__s_parents__();
+        parents->push_back(Object::__s_class_name__());
+        return parents;
+    }
+    virtual shared_ptr<list<string>> __parents__(){ return __s_parents__(); }
+
     Conditions(const vector<ConditionExecutor> &conditions): m_conditions(conditions) {}
     Conditions(const Conditions &o): m_conditions(o.m_conditions) {}
     Conditions &operator=(const Conditions &o) {
@@ -146,9 +262,19 @@ public:
 };
 
 
-class Number {
+class Number: public Object {
     double m_data;
 public:
+    static string __s_class_name__(){ return "Number"; }
+    virtual string __class_name__(){ return __s_class_name__(); }
+    
+    static shared_ptr<list<string>> __s_parents__(){ 
+        auto parents = Object::__s_parents__();
+        parents->push_back(Object::__s_class_name__());
+        return parents;
+    }
+    virtual shared_ptr<list<string>> __parents__(){ return __s_parents__(); }
+
     Number(double data = 0): m_data(data) {}
     Number(const Number &o): m_data(o.m_data) {}
     Number(const string &str): m_data(stod(str)) {}
@@ -340,6 +466,33 @@ public:
     operator string() const { return to_string(m_data); }
 };
 
+class Function: public Object{
+    function<void*(void**)> m_base;
+public:
+    static string __s_class_name__(){ return "Function"; }
+    virtual string __class_name__(){ return __s_class_name__(); }
+    
+    static shared_ptr<list<string>> __s_parents__(){ 
+        auto parents = Object::__s_parents__();
+        parents->push_back(Object::__s_class_name__());
+        return parents;
+    }
+    virtual shared_ptr<list<string>> __parents__(){ return __s_parents__(); }
+
+    Function(const function<void*(void**)> &base): m_base(base) {}
+    Function(const Function &o): m_base(o.m_base) {}
+    Function &operator=(const Function &o) {
+        m_base = o.m_base;
+        return *this;
+    }
+    
+    void* operator()(void **args = nullptr){
+        return m_base(args);
+    }
+    
+    virtual ~Function() {}
+};
+
 /* string -> Number */
 Number operator+(const string &str) { return stod(str); }
 Number operator-(const string &str) { return stod(str); }
@@ -350,11 +503,27 @@ ostream& operator<<(ostream& os, const Number &num) {
 }
 
 int main() {
+    Function gg([](void**){
+        return new Number(33);
+    });
+    Number *gghh = (Number*)gg();
     Number num = 4;
     num <<= 1;
-    cout << num << "\n";
+    cout << num << " : " << *gghh << "\n";
     
+    auto l = For::__s_parents__();
+    list<string>::iterator s;
     
+    For lolkek = For([&]{ s = l->begin(); }, If([&]{ return s != l->end(); }), [&]{ s++; })
+    .bindThen([&]{
+        cout << *s << "/";
+    })
+    .exec();
+    cout << endl;
+    
+    l = gg.__parents__();
+    lolkek.exec();
+    cout << endl;
     
     int lol = 5;
     If a = If(lol == 6);
